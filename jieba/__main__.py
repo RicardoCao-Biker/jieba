@@ -4,6 +4,7 @@ import jieba
 from argparse import ArgumentParser
 from ._compat import *
 
+# 解析参数
 parser = ArgumentParser(usage="%s -m jieba [options] filename" % sys.executable, description="Jieba command line interface.", epilog="If no filename specified, use STDIN instead.")
 parser.add_argument("-d", "--delimiter", metavar="DELIM", default=' / ',
                     nargs='?', const=' ',
