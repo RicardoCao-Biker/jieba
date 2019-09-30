@@ -42,6 +42,7 @@ re_eng = re.compile('[a-zA-Z0-9]', re.U)
 # \r\n|\s : whitespace characters. Will not be handled.
 # re_han_default = re.compile("([\u4E00-\u9FD5a-zA-Z0-9+#&\._%]+)", re.U)
 # Adding "-" symbol in re_han_default
+# 中文编码&英文&部分符号
 re_han_default = re.compile("([\u4E00-\u9FD5a-zA-Z0-9+#&\._%\-]+)", re.U)
 
 re_skip_default = re.compile("(\r\n|\s)", re.U)
@@ -185,6 +186,7 @@ class Tokenizer(object):
         for k in xrange(N):
             tmplist = []
             i = k
+            # 提取字符段第k个字符
             frag = sentence[k]
             while i < N and frag in self.FREQ:
                 if self.FREQ[frag]:
@@ -231,7 +233,7 @@ class Tokenizer(object):
         if buf:
             yield buf
             buf = ''
-
+    # HMM下使用的切词方法
     def __cut_DAG(self, sentence):
         DAG = self.get_DAG(sentence)
         route = {}
@@ -271,7 +273,8 @@ class Tokenizer(object):
             else:
                 for elem in buf:
                     yield elem
-
+    # 切词 cut方法 ，默认使用HMM隐马尔可夫模型  
+    # 例子：sentence： 我来到北京清华大学，今天天气不错,good day!
     def cut(self, sentence, cut_all=False, HMM=True):
         '''
         The main function that segments an entire sentence that contains
@@ -296,11 +299,14 @@ class Tokenizer(object):
             cut_block = self.__cut_DAG
         else:
             cut_block = self.__cut_DAG_NO_HMM
+        # 按正则先把成块的文本切开         
+        # blocks： ['', '我来到北京清华大学', '，', '今天天气不错', ',', 'good', ' ', 'day', '!']
         blocks = re_han.split(sentence)
         for blk in blocks:
             if not blk:
                 continue
             if re_han.match(blk):
+                # 对文本块使用__cut_DAG进一步切词                
                 for word in cut_block(blk):
                     yield word
             else:
