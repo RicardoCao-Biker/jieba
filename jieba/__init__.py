@@ -233,9 +233,12 @@ class Tokenizer(object):
         if buf:
             yield buf
             buf = ''
-    # HMM下使用的切词方法
+    # HMM下使用的DAG图、切词
     def __cut_DAG(self, sentence):
+        # sentence：我来到北京清华大学
         DAG = self.get_DAG(sentence)
+        # {0: [0], 1: [1, 2], 2: [2], 3: [3, 4], 4: [4], 5: [5, 6, 8], 6: [6, 7], 7: [7, 8], 8: [8]}
+        # DAG[5]=[5,6,8]的意思就是，以’清‘开头的话，分别以5、6、8结束时，可以是一个词语，即’清‘、’清华‘、’清华大学‘
         route = {}
         self.calc(sentence, DAG, route)
         x = 0
