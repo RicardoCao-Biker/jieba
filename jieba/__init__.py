@@ -178,7 +178,7 @@ class Tokenizer(object):
         for idx in xrange(N - 1, -1, -1):
             route[idx] = max((log(self.FREQ.get(sentence[idx:x + 1]) or 1) -
                               logtotal + route[x + 1][0], x) for x in DAG[idx])
-
+    # 输出有向无环图
     def get_DAG(self, sentence):
         self.check_initialized()
         DAG = {}
@@ -188,6 +188,7 @@ class Tokenizer(object):
             i = k
             # 提取字符段第k个字符
             frag = sentence[k]
+            # 遍历查询dict.txt文件（349046行，第一列为词语，第二列为该词出现的频率，第三列为该词的词性）
             while i < N and frag in self.FREQ:
                 if self.FREQ[frag]:
                     tmplist.append(i)
@@ -233,9 +234,10 @@ class Tokenizer(object):
         if buf:
             yield buf
             buf = ''
-    # HMM下使用的DAG图、切词
+    # HMM下使用的切词
     def __cut_DAG(self, sentence):
         # sentence：我来到北京清华大学
+        # 输出对应的DAG图数据
         DAG = self.get_DAG(sentence)
         # {0: [0], 1: [1, 2], 2: [2], 3: [3, 4], 4: [4], 5: [5, 6, 8], 6: [6, 7], 7: [7, 8], 8: [8]}
         # DAG[5]=[5,6,8]的意思就是，以’清‘开头的话，分别以5、6、8结束时，可以是一个词语，即’清‘、’清华‘、’清华大学‘
