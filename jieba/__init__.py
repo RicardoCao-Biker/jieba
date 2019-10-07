@@ -171,13 +171,15 @@ class Tokenizer(object):
         if not self.initialized:
             self.initialize()
 
+    # 动态规划 计算最优路径
     def calc(self, sentence, DAG, route):
         N = len(sentence)
         route[N] = (0, 0)
         logtotal = log(self.total)
+        # 从后往前遍历句子
         for idx in xrange(N - 1, -1, -1):
-            route[idx] = max((log(self.FREQ.get(sentence[idx:x + 1]) or 1) -
-                              logtotal + route[x + 1][0], x) for x in DAG[idx])
+            route[idx] = max((log(self.FREQ.get(sentence[idx:x + 1]) or 1) - logtotal + route[x + 1][0], x) for x in DAG[idx])
+
     # 输出有向无环图
     def get_DAG(self, sentence):
         self.check_initialized()
@@ -242,6 +244,7 @@ class Tokenizer(object):
         # {0: [0], 1: [1, 2], 2: [2], 3: [3, 4], 4: [4], 5: [5, 6, 8], 6: [6, 7], 7: [7, 8], 8: [8]}
         # DAG[5]=[5,6,8]的意思就是，以’清‘开头的话，分别以5、6、8结束时，可以是一个词语，即’清‘、’清华‘、’清华大学‘
         route = {}
+        # 维特比算法计算route
         self.calc(sentence, DAG, route)
         x = 0
         buf = ''
@@ -258,6 +261,9 @@ class Tokenizer(object):
                         buf = ''
                     else:
                         if not self.FREQ.get(buf):
+                            # 当遇到一些dict.txt中没出现的词的时候，会进入这个函数
+                            # 使用HMM的方法，对这些未识别成功的词进行标注
+                            print(buf)
                             recognized = finalseg.cut(buf)
                             for t in recognized:
                                 yield t
@@ -272,7 +278,11 @@ class Tokenizer(object):
             if len(buf) == 1:
                 yield buf
             elif not self.FREQ.get(buf):
+                # 当遇到一些dict.txt中没出现的词的时候，会进入这个函数
+                # 使用HMM的方法，对这些未识别成功的词进行标注
+                print(buf)
                 recognized = finalseg.cut(buf)
+                print(recognized)
                 for t in recognized:
                     yield t
             else:
