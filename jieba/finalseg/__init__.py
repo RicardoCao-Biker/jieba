@@ -33,7 +33,7 @@ else:
     from .prob_trans import P as trans_P
     from .prob_emit import P as emit_P
 
-
+# 维特比算法
 def viterbi(obs, states, start_p, trans_p, emit_p):
     V = [{}]  # tabular
     path = {}
@@ -55,10 +55,11 @@ def viterbi(obs, states, start_p, trans_p, emit_p):
 
     return (prob, path[state])
 
-
+# HMM标注切词
 def __cut(sentence):
     global emit_P
     prob, pos_list = viterbi(sentence, 'BMES', start_P, trans_P, emit_P)
+    # 输出 pos_list: ['B', 'M', 'E', 'B', 'M', 'E', 'S', 'S']格式用于切词
     begin, nexti = 0, 0
     # print pos_list, sentence
     for i, char in enumerate(sentence):
