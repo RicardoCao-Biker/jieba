@@ -56,7 +56,7 @@ def viterbi(obs, states, start_p, trans_p, emit_p):
         path = newpath
     # 求出最后一个字哪一种状态的对应概率最大，最后一个字只可能是两种情况：E(结尾)和S(独立词)  
     (prob, state) = max((V[len(obs) - 1][y], y) for y in 'ES')
-    #      
+
     return (prob, path[state])
 
 # HMM标注切词
