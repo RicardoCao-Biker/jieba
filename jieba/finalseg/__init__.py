@@ -35,22 +35,23 @@ else:
 
 # 维特比算法
 def viterbi(obs, states, start_p, trans_p, emit_p):
-    V = [{}]  # tabular
+    V = [{}]  # 状态概率矩阵  
     path = {}
-    for y in states:  # init
+    for y in states:  # 初始化状态概率
         V[0][y] = start_p[y] + emit_p[y].get(obs[0], MIN_FLOAT)
-        path[y] = [y]
+        path[y] = [y]  # 记录路径
     for t in xrange(1, len(obs)):
         V.append({})
         newpath = {}
         for y in states:
             em_p = emit_p[y].get(obs[t], MIN_FLOAT)
+            # t时刻状态为y的最大概率(从t-1时刻中选择到达时刻t且状态为y的状态y0)
             (prob, state) = max(
                 [(V[t - 1][y0] + trans_p[y0].get(y, MIN_FLOAT) + em_p, y0) for y0 in PrevStatus[y]])
             V[t][y] = prob
             newpath[y] = path[state] + [y]
         path = newpath
-
+    # 求出最后一个字哪一种状态的对应概率最大，最后一个字只可能是两种情况：E(结尾)和S(独立词)  
     (prob, state) = max((V[len(obs) - 1][y], y) for y in 'ES')
 
     return (prob, path[state])
