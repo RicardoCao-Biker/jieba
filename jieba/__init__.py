@@ -178,6 +178,7 @@ class Tokenizer(object):
         logtotal = log(self.total)
         # 从后往前遍历句子
         for idx in xrange(N - 1, -1, -1):
+            # 对每个字计算最有可能的词组
             route[idx] = max((log(self.FREQ.get(sentence[idx:x + 1]) or 1) - logtotal + route[x + 1][0], x) for x in DAG[idx])
 
     # 输出有向无环图
@@ -246,12 +247,15 @@ class Tokenizer(object):
         route = {}
         # 维特比算法计算route
         self.calc(sentence, DAG, route)
+        # route: 
+        # {9: (0, 0), 8: (-8.142626068614787, 8), 7: (-8.006816355818659, 8), 6: (-17.53722513662092, 6), 5: (-11.085007904198626, 8), 4: (-20.20431518448597, 4), 3: (-18.548194315526874, 4), 2: (-24.22732015246924, 2), 1: (-27.379629658355885, 2), 0: (-32.587853155857076, 0)}
         x = 0
         buf = ''
         N = len(sentence)
         while x < N:
             y = route[x][1] + 1
             l_word = sentence[x:y]
+            # 无法形成词的buf，交由HMM进行标注
             if y - x == 1:
                 buf += l_word
             else:
@@ -263,7 +267,6 @@ class Tokenizer(object):
                         if not self.FREQ.get(buf):
                             # 当遇到一些dict.txt中没出现的词的时候，会进入这个函数
                             # 使用HMM的方法，对这些未识别成功的词进行标注
-                            print(buf)
                             recognized = finalseg.cut(buf)
                             for t in recognized:
                                 yield t
@@ -290,6 +293,7 @@ class Tokenizer(object):
                     yield elem
     # 切词 cut方法 ，默认使用HMM隐马尔可夫模型  
     # 例子：sentence： 我来到北京清华大学，今天天气不错,good day!
+    # 输出：我/来到/北京/清华大学/，/今天天气/不错/,/good/ /day/!
     def cut(self, sentence, cut_all=False, HMM=True):
         '''
         The main function that segments an entire sentence that contains
